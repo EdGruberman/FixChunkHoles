@@ -56,7 +56,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
             Main.messageManager.respond(sender, MessageLevel.RIGHTS, "You must be a player to use this command.");
             return true;
         }
-      
+        
         Integer radius = null;
         if (args.length != 0 && this.isInteger(args[0])) {
             radius = Integer.parseInt(args[0]);
@@ -69,10 +69,10 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
         
         int refreshed = 0;
         Player player = (Player) sender;
-    
+        
         // Refresh centered at chunk player is standing in.
         refreshed += this.refreshChunk(player.getLocation().getBlock(), radius);
-      
+        
         // Check if player is pointing at a chunk to refresh.
         // Do not refresh chunk player is pointing at if already refreshed because they were standing in it.
         Block block = player.getTargetBlock(null, 100);
