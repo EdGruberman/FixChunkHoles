@@ -1,0 +1,9 @@
+name: FixChunkHoles
+version: %VERSION%
+depend: [MessageManager]
+author: EdGruberman (ed@rjump.com)
+main: edgruberman.bukkit.fixchunkholes.Main
+commands:
+    chunk:
+        description: Refresh chunk player is looking at.
+        usage: /<command>

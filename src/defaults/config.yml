@@ -1,0 +1,6 @@
+level:
+    log: INFO
+    send: RIGHTS
+radius:
+    default: 0
+    maximum: 5
