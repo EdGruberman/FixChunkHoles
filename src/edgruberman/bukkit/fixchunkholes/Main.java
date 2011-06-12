@@ -109,7 +109,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
             }
             
             // east row, north to south
-            for ( int dX = i - 1; dX >= -i; dX++ ) {
+            for ( int dX = -i + 1; dX <= i; dX++ ) {
                 this.refreshChunk(block.getWorld(), block.getChunk().getX() + dX, block.getChunk().getZ() - i);
                 refreshed++;
             }
@@ -121,7 +121,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
             }
             
             // west row, south to north
-            for ( int dX = -i + 1; dX <= i - 1; dX-- ) {
+            for ( int dX = i - 1; dX >= -i + 1; dX-- ) {
                 this.refreshChunk(block.getWorld(), block.getChunk().getX() + dX, block.getChunk().getZ() + i);
                 refreshed++;
             }
