@@ -13,47 +13,55 @@ import org.bukkit.event.Event;
 import edgruberman.bukkit.messagemanager.MessageLevel;
 import edgruberman.bukkit.messagemanager.MessageManager;
 
-public class Main extends org.bukkit.plugin.java.JavaPlugin {
+public final class Main extends org.bukkit.plugin.java.JavaPlugin {
     
-    protected static ConfigurationManager configurationManager;
-    protected static MessageManager messageManager;
+    private static ConfigurationFile configurationFile;
+    private static MessageManager messageManager;
     
     private int radiusDefault;
     private int radiusMaximum;
     
     public void onLoad() {
-        Main.configurationManager = new ConfigurationManager(this);
-        Main.configurationManager.load();
+        Main.configurationFile = new ConfigurationFile(this);
+        Main.getConfigurationFile().load();
         
         Main.messageManager = new MessageManager(this);
-        Main.messageManager.log("Version " + this.getDescription().getVersion());
+        Main.getMessageManager().log("Version " + this.getDescription().getVersion());
     }
 	
     public void onEnable() {
         this.radiusDefault = this.getConfiguration().getInt("radius.default", this.radiusDefault);
-        Main.messageManager.log(MessageLevel.CONFIG, "Default Radius: " + this.radiusDefault);
+        Main.getMessageManager().log("Default Radius: " + this.radiusDefault, MessageLevel.CONFIG);
         
         this.radiusMaximum = this.getConfiguration().getInt("radius.maximum", this.radiusMaximum);
-        Main.messageManager.log(MessageLevel.CONFIG, "Maximum Radius: " + this.radiusMaximum);
+        Main.getMessageManager().log("Maximum Radius: " + this.radiusMaximum, MessageLevel.CONFIG);
         
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_TELEPORT, new PlayerListener(this), Event.Priority.Monitor, this);
         
-        Main.messageManager.log("Plugin Enabled");
+        Main.getMessageManager().log("Plugin Enabled");
     }
     
     public void onDisable() {
-        Main.messageManager.log("Plugin Disabled");
-        Main.messageManager = null;
+        Main.getMessageManager().log("Plugin Disabled");
+    }
+    
+    static ConfigurationFile getConfigurationFile() {
+        return Main.configurationFile;
+    }
+    
+    static MessageManager getMessageManager() {
+        return Main.messageManager;
     }
     
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        Main.messageManager.log(MessageLevel.FINE
-                , ((sender instanceof Player) ? ((Player) sender).getName() : "[CONSOLE]")
-                + " issued command: " + commandLabel + " " + this.join(args)
+        Main.getMessageManager().log(
+                ((sender instanceof Player) ? ((Player) sender).getName() : "[CONSOLE]")
+                    + " issued command: " + commandLabel + " " + this.join(args)
+                , MessageLevel.FINE
         );
         
         if (!(sender instanceof Player)) {
-            Main.messageManager.respond(sender, MessageLevel.RIGHTS, "You must be a player to use this command.");
+            Main.getMessageManager().respond(sender, "You must be a player to use this command.", MessageLevel.RIGHTS);
             return true;
         }
         
@@ -62,7 +70,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
             radius = Integer.parseInt(args[0]);
             
             if (radius > this.radiusMaximum) {
-                Main.messageManager.respond(sender, MessageLevel.SEVERE, "Radius \"" + radius + "\" too large; Maximum allowed is " + this.radiusMaximum + ".");
+                Main.getMessageManager().respond(sender, "Radius \"" + radius + "\" too large; Maximum allowed is " + this.radiusMaximum + ".", MessageLevel.SEVERE);
                 return true;
             }
         }
@@ -79,7 +87,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
         if (block != null && !block.getChunk().equals(player.getLocation().getBlock().getChunk())) 
             refreshed += this.refreshChunk(block, radius);
         
-        Main.messageManager.respond(sender, MessageLevel.STATUS, "Refreshed " + refreshed + " chunk" + (refreshed == 1 ? "" : "s") + ".");
+        Main.getMessageManager().respond(sender, "Refreshed " + refreshed + " chunk" + (refreshed == 1 ? "" : "s") + ".", MessageLevel.STATUS);
         
         return true;
     }
@@ -131,7 +139,7 @@ public class Main extends org.bukkit.plugin.java.JavaPlugin {
     }
     
     protected void refreshChunk(World world, int chunkX, int chunkZ) {
-        Main.messageManager.log(MessageLevel.FINE, "Refreshing chunk in \"" + world.getName() + "\" at cX:" + chunkX + " cZ:" + chunkZ);
+        Main.getMessageManager().log("Refreshing chunk in \"" + world.getName() + "\" at cX:" + chunkX + " cZ:" + chunkZ, MessageLevel.FINE);
         world.refreshChunk(chunkX, chunkZ);
     }
     
