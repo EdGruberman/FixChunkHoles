@@ -7,3 +7,13 @@ commands:
     chunk:
         description: Refresh chunk player is looking at.
         usage: /<command>
+permissions:
+    edgruberman.bukkit.fixchunkholes.command.chunk:
+        description: Can use /chunk command
+        default: true
+    edgruberman.bukkit.fixchunkholes.command.chunk.override.frequency
+        description: Can use /chunk command without frequency restriction
+        default: op
+    edgruberman.bukkit.fixchunkholes.command.chunk.override.radius
+        description: Can use /chunk command without maximum radius restriction
+        default: op

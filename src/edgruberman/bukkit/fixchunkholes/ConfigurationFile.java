@@ -183,7 +183,7 @@ public final class ConfigurationFile {
             if (sinceLastSave < this.maxSaveFrequency) {
                 // If task already scheduled let it run when expected.
                 if (this.taskSave != null && this.owner.getServer().getScheduler().isQueued(this.taskSave)) {
-                    Main.getMessageManager().log("Save request queued; Last save was " + sinceLastSave + " seconds ago.", MessageLevel.FINEST);
+                    Main.messageManager.log("Save request queued; Last save was " + sinceLastSave + " seconds ago.", MessageLevel.FINEST);
                     return;
                 }
                 
@@ -201,7 +201,7 @@ public final class ConfigurationFile {
         
         this.configuration.save();
         this.lastSave = new GregorianCalendar();
-        Main.getMessageManager().log("Configuration file " + this.file.getName() + " saved.", MessageLevel.FINEST);
+        Main.messageManager.log("Configuration file " + this.file.getName() + " saved.", MessageLevel.FINEST);
     }
     
     /**

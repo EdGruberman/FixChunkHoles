@@ -1,7 +1,9 @@
 package edgruberman.bukkit.fixchunkholes;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -15,68 +17,83 @@ import edgruberman.bukkit.messagemanager.MessageManager;
 
 public final class Main extends org.bukkit.plugin.java.JavaPlugin {
     
-    private static ConfigurationFile configurationFile;
-    private static MessageManager messageManager;
+    /**
+     * Prefix for all permissions used in this plugin.
+     */
+    public static final String PERMISSION_PREFIX = Main.class.getPackage().getName();
+    
+    static ConfigurationFile configurationFile;
+    static MessageManager messageManager;
     
     private int radiusDefault;
     private int radiusMaximum;
+    private int frequency;
+    private Map<Player, Long> lastRefresh = new HashMap<Player, Long>();
     
     public void onLoad() {
         Main.configurationFile = new ConfigurationFile(this);
-        Main.getConfigurationFile().load();
+        Main.configurationFile.load();
         
         Main.messageManager = new MessageManager(this);
-        Main.getMessageManager().log("Version " + this.getDescription().getVersion());
+        Main.messageManager.log("Version " + this.getDescription().getVersion());
     }
 	
     public void onEnable() {
         this.radiusDefault = this.getConfiguration().getInt("radius.default", this.radiusDefault);
-        Main.getMessageManager().log("Default Radius: " + this.radiusDefault, MessageLevel.CONFIG);
+        Main.messageManager.log("Default Radius: " + this.radiusDefault, MessageLevel.CONFIG);
         
         this.radiusMaximum = this.getConfiguration().getInt("radius.maximum", this.radiusMaximum);
-        Main.getMessageManager().log("Maximum Radius: " + this.radiusMaximum, MessageLevel.CONFIG);
+        Main.messageManager.log("Maximum Radius: " + this.radiusMaximum, MessageLevel.CONFIG);
         
         this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_TELEPORT, new PlayerListener(this), Event.Priority.Monitor, this);
         
-        Main.getMessageManager().log("Plugin Enabled");
+        Main.messageManager.log("Plugin Enabled");
     }
     
     public void onDisable() {
-        Main.getMessageManager().log("Plugin Disabled");
+        this.lastRefresh.clear();
+        
+        Main.messageManager.log("Plugin Disabled");
     }
     
-    static ConfigurationFile getConfigurationFile() {
-        return Main.configurationFile;
-    }
-    
-    static MessageManager getMessageManager() {
-        return Main.messageManager;
-    }
-    
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        Main.getMessageManager().log(
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        Main.messageManager.log(
                 ((sender instanceof Player) ? ((Player) sender).getName() : "[CONSOLE]")
-                    + " issued command: " + commandLabel + " " + this.join(args)
+                    + " issued command: " + label + " " + Main.join(args)
                 , MessageLevel.FINE
         );
         
-        if (!(sender instanceof Player)) {
-            Main.getMessageManager().respond(sender, "You must be a player to use this command.", MessageLevel.RIGHTS);
+        if (!sender.hasPermission(PERMISSION_PREFIX + ".command." + label)) {
+            Main.messageManager.respond(sender, "You do not have permission to use this command.", MessageLevel.RIGHTS);
             return true;
         }
+        
+        if (!(sender instanceof Player)) {
+            Main.messageManager.respond(sender, "You must be a player to use this command.", MessageLevel.RIGHTS);
+            return true;
+        }
+        
+        Player player = (Player) sender;
+        if (!player.hasPermission(PERMISSION_PREFIX + ".command." + label + ".override.frequency")
+                && (System.currentTimeMillis() - this.lastRefresh.get(player)) < (this.frequency * 1000)) {
+            Main.messageManager.respond(sender, "You can only use this command once every " + this.frequency + " seconds.", MessageLevel.RIGHTS);
+            return true;
+        }
+        
+        this.lastRefresh.put(player, System.currentTimeMillis());
         
         Integer radius = null;
         if (args.length != 0 && this.isInteger(args[0])) {
             radius = Integer.parseInt(args[0]);
             
-            if (radius > this.radiusMaximum) {
-                Main.getMessageManager().respond(sender, "Radius \"" + radius + "\" too large; Maximum allowed is " + this.radiusMaximum + ".", MessageLevel.SEVERE);
+            if (!player.hasPermission(PERMISSION_PREFIX + ".command." + label + ".override.radius")
+                    && radius > this.radiusMaximum) {
+                Main.messageManager.respond(sender, "Radius \"" + radius + "\" too large; Maximum allowed is " + this.radiusMaximum + ".", MessageLevel.SEVERE);
                 return true;
             }
         }
         
         int refreshed = 0;
-        Player player = (Player) sender;
         
         // Refresh centered at chunk player is standing in.
         refreshed += this.refreshChunk(player.getLocation().getBlock(), radius);
@@ -87,16 +104,16 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         if (block != null && !block.getChunk().equals(player.getLocation().getBlock().getChunk())) 
             refreshed += this.refreshChunk(block, radius);
         
-        Main.getMessageManager().respond(sender, "Refreshed " + refreshed + " chunk" + (refreshed == 1 ? "" : "s") + ".", MessageLevel.STATUS);
+        Main.messageManager.respond(sender, "Refreshed " + refreshed + " chunk" + (refreshed == 1 ? "" : "s") + ".", MessageLevel.STATUS);
         
         return true;
     }
     
-    protected int refreshChunk(Block block) {
+    int refreshChunk(Block block) {
         return this.refreshChunk(block, this.radiusDefault);
     }
     
-    protected int refreshChunk(Block block, Integer radius) {
+    private int refreshChunk(Block block, Integer radius) {
         int refreshed = 0;
         
         if (block == null || block.getChunk() == null) return refreshed;
@@ -138,8 +155,8 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         return refreshed;
     }
     
-    protected void refreshChunk(World world, int chunkX, int chunkZ) {
-        Main.getMessageManager().log("Refreshing chunk in \"" + world.getName() + "\" at cX:" + chunkX + " cZ:" + chunkZ, MessageLevel.FINE);
+    private void refreshChunk(World world, int chunkX, int chunkZ) {
+        Main.messageManager.log("Refreshing chunk in \"" + world.getName() + "\" at cX:" + chunkX + " cZ:" + chunkZ, MessageLevel.FINE);
         world.refreshChunk(chunkX, chunkZ);
     }
     
@@ -153,11 +170,24 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         }   
     }
     
-    private String join(String[] s) {
-        return this.join(Arrays.asList(s), " ");
+    /**
+     * Concatenate all string elements of an array together with a space.
+     * 
+     * @param s string array
+     * @return concatenated elements
+     */
+    private static String join(final String[] s) {
+        return join(Arrays.asList(s), " ");
     }
     
-    private String join(List<String> list, String delim) {
+    /**
+     * Combine all the elements of a list together with a delimiter between each.
+     * 
+     * @param list list of elements to join
+     * @param delim delimiter to place between each element
+     * @return string combined with all elements and delimiters
+     */
+    private static String join(final List<String> list, final String delim) {
         if (list == null || list.isEmpty()) return "";
      
         StringBuilder sb = new StringBuilder();
