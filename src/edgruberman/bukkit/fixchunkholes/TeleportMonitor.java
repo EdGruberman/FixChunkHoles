@@ -1,13 +1,16 @@
 package edgruberman.bukkit.fixchunkholes;
 
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-public class PlayerListener extends org.bukkit.event.player.PlayerListener {
+public class TeleportMonitor extends org.bukkit.event.player.PlayerListener {
     
     private Main plugin;
     
-    public PlayerListener(Main plugin) {
+    public TeleportMonitor(Main plugin) {
         this.plugin = plugin;
+        
+        plugin.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_TELEPORT, this, Event.Priority.Monitor, plugin);
     }
     
     @Override

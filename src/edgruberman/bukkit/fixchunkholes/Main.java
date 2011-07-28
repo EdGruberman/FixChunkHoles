@@ -10,7 +10,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 
 import edgruberman.bukkit.messagemanager.MessageLevel;
 import edgruberman.bukkit.messagemanager.MessageManager;
@@ -28,6 +27,7 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
     private int radiusDefault;
     private int radiusMaximum;
     private int frequency;
+    
     private Map<Player, Long> lastRefresh = new HashMap<Player, Long>();
     
     public void onLoad() {
@@ -45,7 +45,10 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         this.radiusMaximum = this.getConfiguration().getInt("radius.maximum", this.radiusMaximum);
         Main.messageManager.log("Maximum Radius: " + this.radiusMaximum, MessageLevel.CONFIG);
         
-        this.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_TELEPORT, new PlayerListener(this), Event.Priority.Monitor, this);
+        this.radiusMaximum = this.getConfiguration().getInt("frequency", this.frequency);
+        Main.messageManager.log("Frequency (seconds): " + this.frequency, MessageLevel.CONFIG);
+        
+        new TeleportMonitor(this);
         
         Main.messageManager.log("Plugin Enabled");
     }
