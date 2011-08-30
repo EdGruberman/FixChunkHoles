@@ -1,15 +1,12 @@
 package edgruberman.bukkit.fixchunkholes;
 
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-public class TeleportMonitor extends org.bukkit.event.player.PlayerListener {
-    
-    private Main plugin;
+final class TeleportMonitor extends PlayerListener {
     
     public TeleportMonitor(Main plugin) {
-        this.plugin = plugin;
-        
         plugin.getServer().getPluginManager().registerEvent(Event.Type.PLAYER_TELEPORT, this, Event.Priority.Monitor, plugin);
     }
     
@@ -24,6 +21,6 @@ public class TeleportMonitor extends org.bukkit.event.player.PlayerListener {
                 && Math.abs(event.getFrom().getBlock().getChunk().getZ() - event.getTo().getBlock().getChunk().getZ()) <= 1
         ) return;
         
-        this.plugin.refreshChunk(event.getTo().getBlock());
+        Main.refreshChunk(event.getTo().getBlock());
     }
 }
