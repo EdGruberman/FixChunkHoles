@@ -119,6 +119,8 @@ public final class ConfigurationFile {
         } else {
             this.configuration = new Configuration(this.file);
         }
+        
+        this.load();
     }
     
     /**
@@ -172,7 +174,7 @@ public final class ConfigurationFile {
      * 
      * @param immediately true to force a save of the configuration file immediately
      */
-    public void save(final boolean immediately) {
+    void save(final boolean immediately) {
         if (!immediately) {
             // Determine how long since last save.
             long sinceLastSave = this.maxSaveFrequency;
@@ -211,7 +213,7 @@ public final class ConfigurationFile {
      * @param destination file to save out to in file system
      */
     private static void extract(final URL source, final File destination) throws FileNotFoundException, IOException {
-        destination.getParentFile().mkdir();
+        destination.getParentFile().mkdirs();
         
         InputStream in = null;
         OutputStream out = null;

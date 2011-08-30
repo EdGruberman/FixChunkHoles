@@ -19,7 +19,7 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
     /**
      * Prefix for all permissions used in this plugin.
      */
-    public static final String PERMISSION_PREFIX = Main.class.getPackage().getName();
+    public static final String PERMISSION_PREFIX = "fixchunkholes";
     
     static ConfigurationFile configurationFile;
     static MessageManager messageManager;
@@ -31,11 +31,10 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
     private Map<Player, Long> lastRefresh = new HashMap<Player, Long>();
     
     public void onLoad() {
-        Main.configurationFile = new ConfigurationFile(this);
-        Main.configurationFile.load();
-        
         Main.messageManager = new MessageManager(this);
         Main.messageManager.log("Version " + this.getDescription().getVersion());
+        
+        Main.configurationFile = new ConfigurationFile(this);
     }
 	
     public void onEnable() {
@@ -45,7 +44,7 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         this.radiusMaximum = this.getConfiguration().getInt("radius.maximum", this.radiusMaximum);
         Main.messageManager.log("Maximum Radius: " + this.radiusMaximum, MessageLevel.CONFIG);
         
-        this.radiusMaximum = this.getConfiguration().getInt("frequency", this.frequency);
+        this.frequency = this.getConfiguration().getInt("frequency", this.frequency);
         Main.messageManager.log("Frequency (seconds): " + this.frequency, MessageLevel.CONFIG);
         
         new TeleportMonitor(this);
@@ -66,7 +65,7 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
                 , MessageLevel.FINE
         );
         
-        if (!sender.hasPermission(PERMISSION_PREFIX + ".command." + label)) {
+        if (!sender.hasPermission(PERMISSION_PREFIX + "." + label)) {
             Main.messageManager.respond(sender, "You do not have permission to use this command.", MessageLevel.RIGHTS);
             return true;
         }
@@ -77,9 +76,9 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         }
         
         Player player = (Player) sender;
-        if (!player.hasPermission(PERMISSION_PREFIX + ".command." + label + ".override.frequency")
+        if (!player.hasPermission(PERMISSION_PREFIX + "." + label + ".override.frequency")
                 && (System.currentTimeMillis() - this.lastRefresh.get(player)) < (this.frequency * 1000)) {
-            Main.messageManager.respond(sender, "You can only use this command once every " + this.frequency + " seconds.", MessageLevel.RIGHTS);
+            Main.messageManager.respond(sender, "You can only use /" + label + " once every " + this.frequency + " seconds.", MessageLevel.RIGHTS);
             return true;
         }
         
@@ -89,7 +88,7 @@ public final class Main extends org.bukkit.plugin.java.JavaPlugin {
         if (args.length != 0 && this.isInteger(args[0])) {
             radius = Integer.parseInt(args[0]);
             
-            if (!player.hasPermission(PERMISSION_PREFIX + ".command." + label + ".override.radius")
+            if (!player.hasPermission(PERMISSION_PREFIX + "." + label + ".override.radius")
                     && radius > this.radiusMaximum) {
                 Main.messageManager.respond(sender, "Radius \"" + radius + "\" too large; Maximum allowed is " + this.radiusMaximum + ".", MessageLevel.SEVERE);
                 return true;

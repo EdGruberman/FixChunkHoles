@@ -1,4 +1,5 @@
 name: FixChunkHoles
+description: Resend chunks to client for rendering.
 version: %VERSION%
 depend: [MessageManager]
 author: EdGruberman (ed@rjump.com)
@@ -8,12 +9,12 @@ commands:
         description: Refresh chunk player is looking at.
         usage: /<command>
 permissions:
-    edgruberman.bukkit.fixchunkholes.command.chunk:
+    fixchunkholes.chunk:
         description: Can use /chunk command
         default: true
-    edgruberman.bukkit.fixchunkholes.command.chunk.override.frequency:
+    fixchunkholes.chunk.override.frequency:
         description: Can use /chunk command without frequency restriction
         default: op
-    edgruberman.bukkit.fixchunkholes.command.chunk.override.radius:
+    fixchunkholes.chunk.override.radius:
         description: Can use /chunk command without maximum radius restriction
         default: op
