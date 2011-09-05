@@ -77,8 +77,10 @@ public final class Main extends JavaPlugin {
         }
         
         Player player = (Player) sender;
+        Long last = this.lastRefresh.get(player);
+        if (last == null) last = 0L;
         if (!player.hasPermission(PERMISSION_PREFIX + "." + label + ".override.frequency")
-                && (System.currentTimeMillis() - this.lastRefresh.get(player)) < (Main.frequency * 1000)) {
+                && (System.currentTimeMillis() - last) < (Main.frequency * 1000)) {
             Main.messageManager.respond(sender, "You can only use /" + label + " once every " + Main.frequency + " seconds.", MessageLevel.RIGHTS);
             return true;
         }
