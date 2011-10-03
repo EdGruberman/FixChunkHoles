@@ -2,6 +2,7 @@ package edgruberman.bukkit.fixchunkholes;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -105,7 +106,7 @@ public final class Main extends JavaPlugin {
         
         // Check if player is pointing at a chunk to refresh.
         // Do not refresh chunk player is pointing at if already refreshed because they were standing in it.
-        Block block = player.getTargetBlock(null, 100);
+        Block block = player.getTargetBlock((HashSet<Byte>) null, 100);
         if (block != null && !block.getChunk().equals(player.getLocation().getBlock().getChunk())) 
             refreshed += Main.refreshChunk(block, radius);
         
